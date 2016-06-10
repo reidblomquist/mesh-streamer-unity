@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.IO;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class MeshStreaming : MonoBehaviour {
@@ -12,6 +13,7 @@ public class MeshStreaming : MonoBehaviour {
 	private Vector3[] vertices;
 	private Color[] colors;
 	private MeshSerializer serializer;
+	private byte[] testBytes;
 
 	private void Start () {
 		GetComponent<MeshFilter>().mesh = mesh = new Mesh();
@@ -52,7 +54,7 @@ public class MeshStreaming : MonoBehaviour {
 			}
 		}
 		mesh.triangles = triangles;
-		serializer.Serialize(mesh);
+		testBytes = serializer.Serialize(mesh);
 
 		yield return null;
 	}

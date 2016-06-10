@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System;
 using System.Text;
+using System.IO;
 using System.Collections;
 
-public class MeshSerializer : MonoBehaviour {
+public class MeshSerializer {
 
     private static readonly byte[] marker = Encoding.ASCII.GetBytes("MESHDATA");
 
@@ -55,6 +56,8 @@ public class MeshSerializer : MonoBehaviour {
 
 			putInt16(packet, indexDataStart + (i * 2), i);
 		}
+		File.WriteAllBytes("./test.mesh", packet);
+
 		return packet;
 	}
 
