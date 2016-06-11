@@ -19,6 +19,7 @@ public class NoisyPrimitive : MonoBehaviour {
         _draft = GenerateMesh();
         _draftOriginal = new MeshDraft(_draft.ToMesh());
         _filter.mesh = _draft.ToMesh();
+
         InvokeRepeating("ToggleNoise", noiseSpeed, noiseSpeed);
 	}
 

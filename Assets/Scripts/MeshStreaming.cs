@@ -10,8 +10,10 @@ public class MeshStreaming : MonoBehaviour
 	public string serverUrl = "localhost:8080";
 	float scale = 1.0f;
 	float noiseScale = 0.5f;
+    public string authorName = "Joe Shmoe";
+    public string title = "Really broken proc mesh";
 
-	private Mesh mesh;
+	public Mesh mesh;
 	private Vector3[] vertices;
 	private Color[] colors;
 	private byte[] testBytes;
@@ -20,13 +22,13 @@ public class MeshStreaming : MonoBehaviour
 
 	private void Start()
 	{
-		GetComponent<MeshFilter>().mesh = mesh = new Mesh();
+		//GetComponent<MeshFilter>().mesh = mesh = new Mesh();
 		meshSender = GetComponent<MeshSenderHTTP>();
-		meshSender.Construct(serverUrl, "Joe Shmoe", "Really broken proc mesh", mesh);
+		meshSender.Construct(serverUrl, authorName, title, mesh);
 		meshSender.Register();
-		mesh.name = "Some Rad Meshy Thing";
+		//mesh.name = "Some Rad Meshy Thing";
 
-		StartCoroutine(Generate());
+		//StartCoroutine(Generate());
 	}
 
 	private IEnumerator Generate()

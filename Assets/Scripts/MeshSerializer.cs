@@ -42,7 +42,7 @@ public class MeshSerializer
 		{ //<>//
 
 			Vector3 position = mesh.vertices[i];
-			Color vertexColor = mesh.colors[i];
+			Color32 vertexColor = mesh.colors32[i];
 
 
 			// encode the position data

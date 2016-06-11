@@ -62,7 +62,12 @@ public class MeshSenderHTTP : MonoBehaviour {
 
 	private static Mesh meshToSend;
 
-	public void Construct(string _rootServerUrl, string _authorName, string _title, Mesh _mesh)
+    public void SetMesh(Mesh _mesh)
+    {
+        meshToSend = _mesh;
+    }
+
+	public void Construct(string _rootServerUrl, string _authorName, string _title, Mesh _mesh = null)
 	{
 		rootServerUrl = _rootServerUrl;
 		authorName = _authorName;
@@ -108,7 +113,7 @@ public class MeshSenderHTTP : MonoBehaviour {
 			}
 			wwwcall = null;
 		}
-		else if (meshKey != 0 && isRegistered == true && needsToSend == true)
+		else if (meshKey != 0 && isRegistered == true && needsToSend == true && meshToSend != null)
 		{
 			if (wwwcall == null)
 			{
