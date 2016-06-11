@@ -6,6 +6,7 @@ using System.IO;
 public class MeshStreaming : MonoBehaviour {
 
     public int gridSize = 10;
+	public string serverUrl = "localhost:8080";
     float scale = 1.0f;
     float noiseScale = 0.5f;
 
@@ -17,10 +18,10 @@ public class MeshStreaming : MonoBehaviour {
 	private MeshSenderHTTP meshSender;
 
 	private void Start () {
-		meshSender = GetComponent<MeshSenderHTTP>();
-		meshSender.Construct("172.16.0.115:8080", "Joe Shmoe", "Really broken proc mesh");
-		meshSender.Register();
         GetComponent<MeshFilter>().mesh = mesh = new Mesh();
+		meshSender = GetComponent<MeshSenderHTTP>();
+		meshSender.Construct(serverUrl, "Joe Shmoe", "Really broken proc mesh", mesh);
+		meshSender.Register();
 		mesh.name = "Some Rad Meshy Thing";
 
 		StartCoroutine(Generate());
@@ -57,10 +58,6 @@ public class MeshStreaming : MonoBehaviour {
 			}
 		}
 		mesh.triangles = triangles;
-		if (meshSender.isRegistered == true)
-		{
-			meshSender.sendFrame(mesh);
-		}
 
 		yield return null;
 	}

@@ -49,38 +49,42 @@ public class MeshSenderHTTP : MonoBehaviour {
 	private MeshSerializer serializer = new MeshSerializer();
 	private RequestWWW wwwcall;
 
-	string rootServerUrl = "";
-	string authorName = "";
-	string title = "";
+	private static string rootServerUrl = "";
+	private static string authorName = "";
+	private static string title = "";
 
-	public bool isRegistered = false;
+	private static bool isRegistered = false;
 
-	bool needsToSend = true;
+	private static bool needsToSend = true;
 
-	int meshSlot = -1;
-	int meshKey = 0;
+	private static int meshSlot = -1;
+	private static int meshKey = 0;
 
-	public void Construct(string rootServerUrl, string authorName, string title)
+	private static Mesh meshToSend;
+
+	public void Construct(string _rootServerUrl, string _authorName, string _title, Mesh _mesh)
 	{
-		this.rootServerUrl = rootServerUrl;
-		this.authorName = authorName;
-		this.title = title;
+		rootServerUrl = _rootServerUrl;
+		authorName = _authorName;
+		title = _title;
+		meshToSend = _mesh;
 	}
 
 	public void Register() {
 		var regMsg = new Dictionary<string, object>();
 
-		regMsg.Add("author", this.authorName);
-		regMsg.Add("title", this.title);
+		regMsg.Add("author", authorName);
+		regMsg.Add("title", title);
 		regMsg.Add("platform", "Unity3D");
 
 		byte[] registration = Encoding.UTF8.GetBytes(Json.Serialize(regMsg));
 
 		wwwcall = new RequestWWW();
-		StartCoroutine(wwwcall.doHttpPost(this.rootServerUrl + "/mesh/register", registration, -1));
+		StartCoroutine(wwwcall.doHttpPost(rootServerUrl + "/mesh/register", registration, -1));
 	}
+
 	void Update () {
-		if (wwwcall != null && wwwcall.IsDone)
+		if (wwwcall != null && wwwcall.IsDone && meshKey == 0 && isRegistered == false)
 		{
 			if (wwwcall.Error != null)
 			{
@@ -93,8 +97,8 @@ public class MeshSenderHTTP : MonoBehaviour {
 				if ((bool)result["result"])
 				{
 					isRegistered = true;
-					meshKey = (int)result["key"];
-					meshSlot = (int)result["index"];
+					meshKey = (int)((long)result["key"]);
+					meshSlot = (int)((long)result["index"]);
 				}
 				else
 				{
@@ -104,17 +108,17 @@ public class MeshSenderHTTP : MonoBehaviour {
 			}
 			wwwcall = null;
 		}
-
-	}
-
-	public void sendFrame(Mesh mesh)
-	{
-
-		if (this.needsToSend)
+		else if (meshKey != 0 && isRegistered == true && needsToSend == true)
 		{
-			wwwcall = new RequestWWW();
-			StartCoroutine(wwwcall.doHttpPost(this.rootServerUrl + "/mesh/" + this.meshSlot + "/frame", serializer.Serialize(mesh), meshKey));
+			if (wwwcall == null)
+			{
+				wwwcall = new RequestWWW();
+				StartCoroutine(wwwcall.doHttpPost(rootServerUrl + "/mesh/" + meshSlot + "/frame", serializer.Serialize(meshToSend), meshKey));
+			}
+			else if (wwwcall != null && wwwcall.IsDone)
+			{
+				wwwcall = null;
+			}
 		}
-
 	}
 }
