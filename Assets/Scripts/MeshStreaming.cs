@@ -17,12 +17,13 @@ public class MeshStreaming : MonoBehaviour {
 	private MeshSenderHTTP meshSender;
 
 	private void Start () {
-		meshSender = new MeshSenderHTTP("172.16.0.115:8080", "Joe Shmoe", "Really broken proc mesh");
+		meshSender = GetComponent<MeshSenderHTTP>();
+		meshSender.Construct("172.16.0.115:8080", "Joe Shmoe", "Really broken proc mesh");
+		meshSender.Register();
         GetComponent<MeshFilter>().mesh = mesh = new Mesh();
 		mesh.name = "Some Rad Meshy Thing";
 
 		StartCoroutine(Generate());
-		StartCoroutine(meshSender.sendFrame(mesh));
 	}
 
 	private IEnumerator Generate () {
@@ -56,6 +57,10 @@ public class MeshStreaming : MonoBehaviour {
 			}
 		}
 		mesh.triangles = triangles;
+		if (meshSender.isRegistered == true)
+		{
+			meshSender.sendFrame(mesh);
+		}
 
 		yield return null;
 	}

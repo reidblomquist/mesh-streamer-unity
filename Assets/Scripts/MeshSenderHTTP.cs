@@ -5,68 +5,27 @@ using System.Collections;
 using System.Text;
 using System.Collections.Generic;
 
-public class MeshSenderHTTP : MonoBehaviour {
-	private MeshSerializer serializer = new MeshSerializer();
-
-	string rootServerUrl = "";
-	string authorName = "";
-	string title = "";
-
-	bool isRegistered = false;
-
-	bool needsToSend = true;
-
-	int meshSlot = -1;
-	int meshKey = 0;
-
-	public MeshSenderHTTP (string rootServerUrl, string authorName, string title)
+public class RequestWWW
+{
+	public bool IsDone
 	{
-		this.rootServerUrl = rootServerUrl;
-		this.authorName = authorName;
-		this.title = title;
-
-		var regMsg = new Dictionary<string, object>();
-
-		regMsg.Add("author", this.authorName);
-		regMsg.Add("title", this.title);
-		regMsg.Add("platform", "Unity3D");
-
-		byte[] registration = Encoding.UTF8.GetBytes(Json.Serialize(regMsg));
-
-		string responseText = doHTTPPost(this.rootServerUrl + "/mesh/register", registration);
-
-		var result = Json.Deserialize(responseText) as Dictionary<string,object>;
-
-		if ((bool) result["result"])
-		{
-			isRegistered = true;
-			meshKey = (int) result["key"];
-			meshSlot = (int) result["index"];
-		}
-		else
-		{
-			isRegistered = false;
-			Debug.Log("Unable to register: " + (string) result["error"]);
-		}
+		get;
+		private set;
 	}
 
-	public IEnumerator sendFrame(Mesh mesh)
+	public string Text
 	{
-
-		if (this.isRegistered && this.needsToSend)
-		{
-			doHTTPPost(this.rootServerUrl + "/mesh/" + this.meshSlot + "/frame", serializer.Serialize(mesh), meshKey);
-		}
-		yield return null;
-
+		get;
+		private set;
 	}
 
-	string doHTTPPost(string urlString, byte[] payload)
+	public string Error
 	{
-		return doHTTPPost(urlString, payload, -1);
+		get;
+		private set;
 	}
 
-	string doHTTPPost(string urlString, byte[] payload, int meshKey)
+	public IEnumerator doHttpPost(string url, byte[] payload, int meshKey)
 	{
 		Dictionary<string, string> headers = new Dictionary<string, string>();
 
@@ -78,13 +37,82 @@ public class MeshSenderHTTP : MonoBehaviour {
 			headers.Add("slot-key", meshKey.ToString());
 		}
 
-		WWW www = new WWW(urlString, payload, headers);
+		WWW www = new WWW(url, payload, headers);
+		yield return www;
+		IsDone = true;
+		Error = www.error;
+		Text = www.text;
+	}
+}
 
-		if (www.error != null)
+public class MeshSenderHTTP : MonoBehaviour {
+	private MeshSerializer serializer = new MeshSerializer();
+	private RequestWWW wwwcall;
+
+	string rootServerUrl = "";
+	string authorName = "";
+	string title = "";
+
+	public bool isRegistered = false;
+
+	bool needsToSend = true;
+
+	int meshSlot = -1;
+	int meshKey = 0;
+
+	public void Construct(string rootServerUrl, string authorName, string title)
+	{
+		this.rootServerUrl = rootServerUrl;
+		this.authorName = authorName;
+		this.title = title;
+	}
+
+	public void Register() {
+		var regMsg = new Dictionary<string, object>();
+
+		regMsg.Add("author", this.authorName);
+		regMsg.Add("title", this.title);
+		regMsg.Add("platform", "Unity3D");
+
+		byte[] registration = Encoding.UTF8.GetBytes(Json.Serialize(regMsg));
+
+		wwwcall = new RequestWWW();
+		StartCoroutine(wwwcall.doHttpPost(this.rootServerUrl + "/mesh/register", registration, -1));
+		if (wwwcall != null && wwwcall.IsDone)
 		{
-			return www.error;
-		} else {
-			return www.text;
+			if (wwwcall.Error != null)
+			{
+				Debug.Log("error registering: " + wwwcall.Error);
+			}
+			else
+			{
+				var result = Json.Deserialize(wwwcall.Text) as Dictionary<string, object>;
+
+				if ((bool)result["result"])
+				{
+					isRegistered = true;
+					meshKey = (int)result["key"];
+					meshSlot = (int)result["index"];
+				}
+				else
+				{
+					isRegistered = false;
+					Debug.Log("Unable to register: " + (string)result["error"]);
+				}
+			}
+			wwwcall = null;
 		}
+
+	}
+
+	public void sendFrame(Mesh mesh)
+	{
+
+		if (this.needsToSend)
+		{
+			wwwcall = new RequestWWW();
+			StartCoroutine(wwwcall.doHttpPost(this.rootServerUrl + "/mesh/" + this.meshSlot + "/frame", serializer.Serialize(mesh), meshKey));
+		}
+
 	}
 }
