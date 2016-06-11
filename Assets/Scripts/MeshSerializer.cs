@@ -4,9 +4,10 @@ using System.Text;
 using System.IO;
 using System.Collections;
 
-public class MeshSerializer {
+public class MeshSerializer
+{
 
-    private static readonly byte[] marker = Encoding.ASCII.GetBytes("MESHDATA");
+	private static readonly byte[] marker = Encoding.ASCII.GetBytes("MESHDATA");
 
 	public byte[] Serialize(Mesh mesh)
 	{
