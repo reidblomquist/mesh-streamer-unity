@@ -12,15 +12,17 @@ public class MeshStreaming : MonoBehaviour {
 	private Mesh mesh;
 	private Vector3[] vertices;
 	private Color[] colors;
-	private MeshSerializer serializer;
 	private byte[] testBytes;
 
+	private MeshSenderHTTP meshSender;
+
 	private void Start () {
-		GetComponent<MeshFilter>().mesh = mesh = new Mesh();
-		serializer = new MeshSerializer();
+		meshSender = new MeshSenderHTTP("172.16.0.115:8080", "Joe Shmoe", "Really broken proc mesh");
+        GetComponent<MeshFilter>().mesh = mesh = new Mesh();
 		mesh.name = "Some Rad Meshy Thing";
 
 		StartCoroutine(Generate());
+		StartCoroutine(meshSender.sendFrame(mesh));
 	}
 
 	private IEnumerator Generate () {
@@ -54,7 +56,6 @@ public class MeshStreaming : MonoBehaviour {
 			}
 		}
 		mesh.triangles = triangles;
-		testBytes = serializer.Serialize(mesh);
 
 		yield return null;
 	}
