@@ -57,6 +57,7 @@ public class MeshSerializer
 
 			putInt16(packet, indexDataStart + (i * 2), i);
 		}
+		File.WriteAllBytes("./test.mesh", packet);
 
 		return packet;
 	}
