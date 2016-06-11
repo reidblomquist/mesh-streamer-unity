@@ -78,6 +78,8 @@ public class MeshSenderHTTP : MonoBehaviour {
 
 		wwwcall = new RequestWWW();
 		StartCoroutine(wwwcall.doHttpPost(this.rootServerUrl + "/mesh/register", registration, -1));
+	}
+	void Update () {
 		if (wwwcall != null && wwwcall.IsDone)
 		{
 			if (wwwcall.Error != null)
