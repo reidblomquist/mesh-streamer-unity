@@ -12,10 +12,12 @@ public class MeshSerializer
 	public byte[] Serialize(Mesh mesh)
 	{
 		int vertexCount = mesh.vertexCount;
+		int[] triangles = mesh.triangles;
+		int trianglesCount = triangles.Length;
 
 		int positionCount = vertexCount; // x, y, z tripplets
 		int colorCount = vertexCount; // r, g, b tripplets
-		int indexCount = vertexCount;
+		int indexCount = trianglesCount;
 
 		int headerDataByteCount = 16;
 		int positionDataByteCount = positionCount * 3 * 4;
@@ -42,6 +44,7 @@ public class MeshSerializer
 			Vector3 position = mesh.vertices[i];
 			Color vertexColor = mesh.colors[i];
 
+
 			// encode the position data
 			putFloat(packet, positionDataStart + (i * 12), position.x);
 			putFloat(packet, positionDataStart + (i * 12) + 4, position.y);
@@ -54,8 +57,11 @@ public class MeshSerializer
 			packet[colorDataStart + (i * 3)] = r;
 			packet[colorDataStart + (i * 3) + 1] = g;
 			packet[colorDataStart + (i * 3) + 2] = b;
+		}
 
-			putInt16(packet, indexDataStart + (i * 2), i);
+		for (int i = 0; i < triangles.Length; i++)
+		{
+			putInt16(packet, indexDataStart + (i * 2), triangles[i]);
 		}
 
 		return packet;
