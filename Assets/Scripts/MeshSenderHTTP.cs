@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using MiniJSON;
 using System;
+using System.IO;
 using System.Collections;
 using System.Text;
 using System.Collections.Generic;
@@ -46,6 +47,9 @@ public class RequestWWW
 }
 
 public class MeshSenderHTTP : MonoBehaviour {
+	public bool writeMeshToFile = false;
+	public string fileName = "test";
+
 	private MeshSerializer serializer = new MeshSerializer();
 	private RequestWWW wwwcall;
 
@@ -84,6 +88,10 @@ public class MeshSenderHTTP : MonoBehaviour {
 	}
 
 	void Update () {
+		if (writeMeshToFile == true)
+		{
+			File.WriteAllBytes("./" + fileName + ".mesh", serializer.Serialize(meshToSend));
+		}
 		if (wwwcall != null && wwwcall.IsDone && meshKey == 0 && isRegistered == false)
 		{
 			if (wwwcall.Error != null)
