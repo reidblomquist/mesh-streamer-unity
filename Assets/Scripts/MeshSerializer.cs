@@ -42,7 +42,7 @@ public class MeshSerializer
 		{ //<>//
 
 			Vector3 position = mesh.vertices[i];
-			Color vertexColor = mesh.colors[i];
+			Color32 vertexColor = mesh.colors32[i];
 
 
 			// encode the position data
@@ -63,6 +63,7 @@ public class MeshSerializer
 		{
 			putInt16(packet, indexDataStart + (i * 2), triangles[i]);
 		}
+		File.WriteAllBytes("./test.mesh", packet);
 
 		return packet;
 	}
